@@ -15,9 +15,6 @@ NSString *const CYLTabBarItemTitle = @"CYLTabBarItemTitle";
 NSString *const CYLTabBarItemImage = @"CYLTabBarItemImage";
 NSString *const CYLTabBarItemSelectedImage = @"CYLTabBarItemSelectedImage";
 
-NSUInteger CYLTabbarItemsCount = 0;
-NSUInteger CYLPlusButtonIndex = 0;
-CGFloat CYLTabBarItemWidth = 0.0f;
 NSString *const CYLTabBarItemWidthDidChangeNotification = @"CYLTabBarItemWidthDidChangeNotification";
 static void * const CYLSwappableImageViewDefaultOffsetContext = (void*)&CYLSwappableImageViewDefaultOffsetContext;
 
@@ -67,16 +64,16 @@ static void * const CYLSwappableImageViewDefaultOffsetContext = (void*)&CYLSwapp
 #pragma mark -
 #pragma mark - public Methods
 
-+ (BOOL)havePlusButton {
-    if (CYLExternPlusButton) {
+- (BOOL)havePlusButton {
+    if (self.CYLExternPlusButton) {
         return YES;
     }
     return NO;
 }
 
-+ (NSUInteger)allItemsInTabBarCount {
-    NSUInteger allItemsInTabBar = CYLTabbarItemsCount;
-    if ([CYLTabBarController havePlusButton]) {
+- (NSUInteger)allItemsInTabBarCount {
+    NSUInteger allItemsInTabBar = self.CYLTabbarItemsCount;
+    if ([self havePlusButton]) {
         allItemsInTabBar += 1;
     }
     return allItemsInTabBar;
@@ -125,21 +122,21 @@ static void * const CYLSwappableImageViewDefaultOffsetContext = (void*)&CYLSwapp
             [NSException raise:@"CYLTabBarController" format:@"The count of CYLTabBarControllers is not equal to the count of tabBarItemsAttributes.【Chinese】设置_tabBarItemsAttributes属性时，请确保元素个数与控制器的个数相同，并在方法`-setViewControllers:`之前设置"];
         }
         
-        if (CYLPlusChildViewController) {
+        if (self.CYLPlusChildViewController) {
             NSMutableArray *viewControllersWithPlusButton = [NSMutableArray arrayWithArray:viewControllers];
-            [viewControllersWithPlusButton insertObject:CYLPlusChildViewController atIndex:CYLPlusButtonIndex];
+            [viewControllersWithPlusButton insertObject:self.CYLPlusChildViewController atIndex:self.CYLPlusButtonIndex];
             _viewControllers = [viewControllersWithPlusButton copy];
         } else {
             _viewControllers = [viewControllers copy];
         }
-        CYLTabbarItemsCount = [viewControllers count];
-        CYLTabBarItemWidth = ([UIScreen mainScreen].bounds.size.width - CYLPlusButtonWidth) / (CYLTabbarItemsCount);
+        self.CYLTabbarItemsCount = [viewControllers count];
+        self.CYLTabBarItemWidth = ([UIScreen mainScreen].bounds.size.width - self.CYLPlusButtonWidth) / (self.CYLTabbarItemsCount);
         NSUInteger idx = 0;
         for (UIViewController *viewController in _viewControllers) {
             NSString *title = nil;
             NSString *normalImageName = nil;
             NSString *selectedImageName = nil;
-            if (viewController != CYLPlusChildViewController) {
+            if (viewController != self.CYLPlusChildViewController) {
                 title = _tabBarItemsAttributes[idx][CYLTabBarItemTitle];
                 normalImageName = _tabBarItemsAttributes[idx][CYLTabBarItemImage];
                 selectedImageName = _tabBarItemsAttributes[idx][CYLTabBarItemSelectedImage];
@@ -237,9 +234,9 @@ static void * const CYLSwappableImageViewDefaultOffsetContext = (void*)&CYLSwapp
 
 - (BOOL)tabBarController:(UITabBarController *)tabBarController shouldSelectViewController:(UIViewController*)viewController {
     NSUInteger selectedIndex = tabBarController.selectedIndex;
-    UIButton *plusButton = CYLExternPlusButton;
-    if (CYLPlusChildViewController) {
-        if ((selectedIndex == CYLPlusButtonIndex) && (viewController != CYLPlusChildViewController)) {
+    UIButton *plusButton = self.CYLExternPlusButton;
+    if (self.CYLPlusChildViewController) {
+        if ((selectedIndex == self.CYLPlusButtonIndex) && (viewController != self.CYLPlusChildViewController)) {
             plusButton.selected = NO;
         }
     }

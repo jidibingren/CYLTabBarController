@@ -13,10 +13,8 @@
 FOUNDATION_EXTERN NSString *const CYLTabBarItemTitle;
 FOUNDATION_EXTERN NSString *const CYLTabBarItemImage;
 FOUNDATION_EXTERN NSString *const CYLTabBarItemSelectedImage;
-FOUNDATION_EXTERN NSUInteger CYLTabbarItemsCount;
-FOUNDATION_EXTERN NSUInteger CYLPlusButtonIndex;
-FOUNDATION_EXTERN CGFloat CYLPlusButtonWidth;
-FOUNDATION_EXTERN CGFloat CYLTabBarItemWidth;
+
+@protocol CYLPlusButtonSubclassing;
 
 @interface CYLTabBarController : UITabBarController
 
@@ -47,15 +45,27 @@ FOUNDATION_EXTERN CGFloat CYLTabBarItemWidth;
  */
 @property (nonatomic, readwrite, assign) UIOffset titlePositionAdjustment;
 
+@property (nonatomic, strong) UIButton<CYLPlusButtonSubclassing> *CYLExternPlusButton;
+
+@property (nonatomic, assign) CGFloat CYLPlusButtonWidth;
+
+@property (nonatomic, assign) NSUInteger CYLPlusButtonIndex;
+
+@property (nonatomic, strong) UIViewController *CYLPlusChildViewController;
+
+@property (nonatomic, assign) CGFloat CYLTabBarItemWidth;
+
+@property (nonatomic, assign) NSUInteger CYLTabbarItemsCount;
+
 /*!
  * Judge if there is plus button.
  */
-+ (BOOL)havePlusButton;
+- (BOOL)havePlusButton;
 
 /*!
  * @attention Include plusButton if exists.
  */
-+ (NSUInteger)allItemsInTabBarCount;
+- (NSUInteger)allItemsInTabBarCount;
 
 - (id<UIApplicationDelegate>)appDelegate;
 

@@ -10,9 +10,10 @@
 #import "CYLPlusButton.h"
 #import "CYLTabBarController.h"
 
-static void *const CYLTabBarContext = (void*)&CYLTabBarContext;
 
-@interface CYLTabBar ()
+@interface CYLTabBar (){
+    void * CYLTabBarContext;
+}
 
 /** 发布按钮 */
 @property (nonatomic, strong) UIButton<CYLPlusButtonSubclassing> *plusButton;
@@ -42,23 +43,24 @@ static void *const CYLTabBarContext = (void*)&CYLTabBarContext;
 }
 
 - (instancetype)sharedInit {
-    if (CYLExternPlusButton) {
-        self.plusButton = CYLExternPlusButton;
-        [self addSubview:(UIButton *)self.plusButton];
-    }
+    CYLTabBarContext = (void*)&CYLTabBarContext;
     // KVO注册监听
-    _tabBarItemWidth = CYLTabBarItemWidth;
     [self addObserver:self forKeyPath:@"tabBarItemWidth" options:NSKeyValueObservingOptionNew context:CYLTabBarContext];
     return self;
 }
 
 - (void)layoutSubviews {
+    
+    if (((CYLTabBarController*)self.delegate).CYLExternPlusButton && !self.plusButton) {
+        self.plusButton = ((CYLTabBarController*)self.delegate).CYLExternPlusButton;
+        [self addSubview:(UIButton *)self.plusButton];
+    }
     [super layoutSubviews];
     CGFloat barWidth = self.bounds.size.width;
     CGFloat barHeight = self.bounds.size.height;
-    CYLTabBarItemWidth = (barWidth - CYLPlusButtonWidth) / CYLTabbarItemsCount;
-    self.tabBarItemWidth = CYLTabBarItemWidth;
-    if (!CYLExternPlusButton) {
+    ((CYLTabBarController*)self.delegate).CYLTabBarItemWidth = (barWidth - ((CYLTabBarController*)self.delegate).CYLPlusButtonWidth) / ((CYLTabBarController*)self.delegate).CYLTabbarItemsCount;
+    self.tabBarItemWidth = ((CYLTabBarController*)self.delegate).CYLTabBarItemWidth;
+    if (!((CYLTabBarController*)self.delegate).CYLExternPlusButton) {
         return;
     }
     CGFloat multiplerInCenterY = [self multiplerInCenterY];
@@ -71,14 +73,14 @@ static void *const CYLTabBarContext = (void*)&CYLTabBarContext;
         //调整UITabBarItem的位置
         CGFloat childViewX;
         if (buttonIndex >= plusButtonIndex) {
-            childViewX = buttonIndex * CYLTabBarItemWidth + CYLPlusButtonWidth;
+            childViewX = buttonIndex * ((CYLTabBarController*)self.delegate).CYLTabBarItemWidth + ((CYLTabBarController*)self.delegate).CYLPlusButtonWidth;
         } else {
-            childViewX = buttonIndex * CYLTabBarItemWidth;
+            childViewX = buttonIndex * ((CYLTabBarController*)self.delegate).CYLTabBarItemWidth;
         }
         //仅修改childView的x和宽度,yh值不变
         childView.frame = CGRectMake(childViewX,
                                      CGRectGetMinY(childView.frame),
-                                     CYLTabBarItemWidth,
+                                     ((CYLTabBarController*)self.delegate).CYLTabBarItemWidth,
                                      CGRectGetHeight(childView.frame)
                                      );
     }];
@@ -148,18 +150,18 @@ static void *const CYLTabBarContext = (void*)&CYLTabBarContext;
     if ([[self.plusButton class] respondsToSelector:@selector(indexOfPlusButtonInTabBar)]) {
         plusButtonIndex = [[self.plusButton class] indexOfPlusButtonInTabBar];
         //仅修改self.plusButton的x,ywh值不变
-        self.plusButton.frame = CGRectMake(plusButtonIndex * CYLTabBarItemWidth,
+        self.plusButton.frame = CGRectMake(plusButtonIndex * ((CYLTabBarController*)self.delegate).CYLTabBarItemWidth,
                                            CGRectGetMinY(self.plusButton.frame),
                                            CGRectGetWidth(self.plusButton.frame),
                                            CGRectGetHeight(self.plusButton.frame)
                                            );
     } else {
-        if (CYLTabbarItemsCount % 2 != 0) {
+        if (((CYLTabBarController*)self.delegate).CYLTabbarItemsCount % 2 != 0) {
             [NSException raise:@"CYLTabBarController" format:@"If the count of CYLTabbarControllers is odd,you must realizse `+indexOfPlusButtonInTabBar` in your custom plusButton class.【Chinese】如果CYLTabbarControllers的个数是奇数，你必须在你自定义的plusButton中实现`+indexOfPlusButtonInTabBar`，来指定plusButton的位置"];
         }
-        plusButtonIndex = CYLTabbarItemsCount * 0.5;
+        plusButtonIndex = ((CYLTabBarController*)self.delegate).CYLTabbarItemsCount * 0.5;
     }
-    CYLPlusButtonIndex = plusButtonIndex;
+    ((CYLTabBarController *)self.delegate).CYLPlusButtonIndex = plusButtonIndex;
     return plusButtonIndex;
 }
 
@@ -183,8 +185,8 @@ static void *const CYLTabBarContext = (void*)&CYLTabBarContext;
             [tabBarButtonMutableArray addObject:obj];
         }
     }];
-    if (CYLPlusChildViewController) {
-        [tabBarButtonMutableArray removeObjectAtIndex:CYLPlusButtonIndex];
+    if (((CYLTabBarController*)self.delegate).CYLPlusChildViewController) {
+        [tabBarButtonMutableArray removeObjectAtIndex:((CYLTabBarController *)self.delegate).CYLPlusButtonIndex];
     }
     return [tabBarButtonMutableArray copy];
 }

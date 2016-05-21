@@ -9,28 +9,26 @@
 #import "CYLPlusButton.h"
 #import "CYLTabBarController.h"
 
-CGFloat CYLPlusButtonWidth = 0.0f;
-UIButton<CYLPlusButtonSubclassing> *CYLExternPlusButton = nil;
-UIViewController *CYLPlusChildViewController = nil;
-
 @implementation CYLPlusButton
 
 #pragma mark -
 #pragma mark - public Methods
 
-+ (void)registerSubclass {
++ (void)registerSubclassFor:(CYLTabBarController *)cylTabbarController {
+    
     if (![self conformsToProtocol:@protocol(CYLPlusButtonSubclassing)]) {
         return;
     }
+    
     Class<CYLPlusButtonSubclassing> class = self;
     UIButton<CYLPlusButtonSubclassing> *plusButton = [class plusButton];
-    CYLExternPlusButton = plusButton;
-    CYLPlusButtonWidth = plusButton.frame.size.width;
+    cylTabbarController.CYLExternPlusButton = plusButton;
+    cylTabbarController.CYLPlusButtonWidth = plusButton.frame.size.width;
     if ([[self class] respondsToSelector:@selector(plusChildViewController)]) {
-        CYLPlusChildViewController = [class plusChildViewController];
+        cylTabbarController.CYLPlusChildViewController = [class plusChildViewController];
         [[self class] addSelectViewControllerTarget:plusButton];
         if ([[self class] respondsToSelector:@selector(indexOfPlusButtonInTabBar)]) {
-            CYLPlusButtonIndex = [[self class] indexOfPlusButtonInTabBar];
+            cylTabbarController.CYLPlusButtonIndex = [[self class] indexOfPlusButtonInTabBar];
         } else {
             [NSException raise:@"CYLTabBarController" format:@"If you want to add PlusChildViewController, you must realizse `+indexOfPlusButtonInTabBar` in your custom plusButton class.【Chinese】如果你想使用PlusChildViewController样式，你必须同时在你自定义的plusButton中实现 `+indexOfPlusButtonInTabBar`，来指定plusButton的位置"];
         }
@@ -39,7 +37,7 @@ UIViewController *CYLPlusChildViewController = nil;
 
 - (void)plusChildViewControllerButtonClicked:(UIButton<CYLPlusButtonSubclassing> *)sender {
     sender.selected = YES;
-    [self cyl_tabBarController].selectedIndex = CYLPlusButtonIndex;
+    [self cyl_tabBarController].selectedIndex = [self cyl_tabBarController].CYLPlusButtonIndex;
 }
 
 #pragma mark -
